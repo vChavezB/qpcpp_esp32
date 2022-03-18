@@ -11,9 +11,10 @@ using namespace QP;
 // un-comment if QS instrumentation needed
 //#define QS_ON
 // BSP functions
-static void freertos_tick_hook(void); /*Tick hook for QP */
+static void tickHook_ESP32(void); /*Tick hook for QP */
 static uint8_t const l_TickHook = static_cast<uint8_t>(0);
-static void freertos_tick_hook(void)
+
+static void tickHook_ESP32(void)
 {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     /* process time events for rate 0 */
@@ -76,7 +77,7 @@ bool IdleHook(void) {
 }
 void QF::onStartup(void) {
     esp_register_freertos_idle_hook(IdleHook);
-    esp_register_freertos_tick_hook_for_cpu(freertos_tick_hook, QP_CPU_NUM);
+    esp_register_freertos_tick_hook_for_cpu(tickHook_ESP32, QP_CPU_NUM);
     QS_OBJ_DICTIONARY(&l_TickHook);
 }
 //............................................................................
