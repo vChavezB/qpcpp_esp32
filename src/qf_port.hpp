@@ -40,6 +40,10 @@
 #ifndef QF_PORT_HPP
 #define QF_PORT_HPP
 
+// Select the CPU at which the QP Framework will be attached
+#define CONFIG_QP_PINNED_TO_CORE_0
+//#define CONFIG_QP_PINNED_TO_CORE_1
+
 // Activate the QF ISR API required for FreeRTOS
 #define QF_ISR_API            1
 
@@ -69,6 +73,16 @@
 
 /* global spinlock "mutex" for all critical sections in QF (see NOTE3) */
 extern PRIVILEGED_DATA portMUX_TYPE QF_esp32mux;
+
+
+#if defined( CONFIG_QP_PINNED_TO_CORE_0 )
+    #define QP_CPU_NUM         PRO_CPU_NUM
+#elif defined( CONFIG_QP_PINNED_TO_CORE_0 )
+    #define QP_CPU_NUM         APP_CPU_NUM
+#else
+    /* Defaults to APP_CPU */
+    #define QP_CPU_NUM         APP_CPU_NUM
+#endif
 
 /* the "FromISR" versions of the QF APIs, see NOTE4 */
 #ifdef Q_SPY

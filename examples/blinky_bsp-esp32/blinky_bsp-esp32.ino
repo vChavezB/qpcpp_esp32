@@ -6,26 +6,25 @@ using namespace QP;
 
 //............................................................................
 void setup() {
+    Serial.begin(115200);
+    Serial.println("Starting demo");
     QF::init(); // initialize the framework
     BSP::init(); // initialize the BSP
 
     // statically allocate event queues for the AOs and start them...
-    static QEvt const *blinky_queueSto[10];
+    static QEvt const *blinky_queueSto[30];
     AO_Blinky->start(1U, // priority
                      blinky_queueSto, Q_DIM(blinky_queueSto),
-                     (void *)0, 0U); // no stack
-    //...
+                     (void *)0, 1000U); // no stack
+     QF::run(); // run the QF/C++ framework
 }
 
 //............................................................................
 void loop() {
-    QF::run(); // run the QF/C++ framework
+  delay(500);
 }
 
-//============================================================================
-// generate declarations and definitions of all AO classes (state machines)...
-//.$declare${AOs::Blinky} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-//.${AOs::Blinky} ............................................................
+
 class Blinky : public QP::QActive {
 private:
     QP::QTimeEvt m_timeEvt;
@@ -41,23 +40,18 @@ protected:
     Q_STATE_DECL(off);
     Q_STATE_DECL(on);
 };
-//.$enddecl${AOs::Blinky} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//.$skip${QP_VERSION} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
 //. Check for the minimum required QP version
 #if (QP_VERSION < 690U) || (QP_VERSION != ((QP_RELEASE^4294967295U) % 0x3E8U))
 #error qpcpp version 6.9.0 or higher required
 #endif
-//.$endskip${QP_VERSION} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//.$define${AOs::Blinky} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-//.${AOs::Blinky} ............................................................
+
 Blinky Blinky::instance;
-//.${AOs::Blinky::Blinky} ....................................................
 Blinky::Blinky()
 : QActive(Q_STATE_CAST(&Blinky::initial)),
     m_timeEvt(this, TIMEOUT_SIG, 0U)
 {}
 
-//.${AOs::Blinky::SM} ........................................................
 Q_STATE_DEF(Blinky, initial) {
     //.${AOs::Blinky::SM::initial}
     (void)e; // unused parameter
@@ -71,18 +65,20 @@ Q_STATE_DEF(Blinky, initial) {
 
     return tran(&off);
 }
-//.${AOs::Blinky::SM::off} ...................................................
+
 Q_STATE_DEF(Blinky, off) {
     QP::QState status_;
     switch (e->sig) {
         //.${AOs::Blinky::SM::off}
         case Q_ENTRY_SIG: {
+            Serial.println("ledoff");
             BSP::ledOff();
             status_ = Q_RET_HANDLED;
             break;
         }
         //.${AOs::Blinky::SM::off::TIMEOUT}
         case TIMEOUT_SIG: {
+            Serial.println("t1");
             status_ = tran(&on);
             break;
         }
@@ -93,18 +89,20 @@ Q_STATE_DEF(Blinky, off) {
     }
     return status_;
 }
-//.${AOs::Blinky::SM::on} ....................................................
+
 Q_STATE_DEF(Blinky, on) {
     QP::QState status_;
     switch (e->sig) {
         //.${AOs::Blinky::SM::on}
         case Q_ENTRY_SIG: {
+            Serial.println("ledon");
             BSP::ledOn();
             status_ = Q_RET_HANDLED;
             break;
         }
         //.${AOs::Blinky::SM::on::TIMEOUT}
         case TIMEOUT_SIG: {
+            Serial.println("t2");
             status_ = tran(&off);
             break;
         }
@@ -115,13 +113,5 @@ Q_STATE_DEF(Blinky, on) {
     }
     return status_;
 }
-//.$enddef${AOs::Blinky} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//...
 
-//============================================================================
-// generate definitions of all AO opaque pointers...
-//.$define${AOs::AO_Blinky} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-//.${AOs::AO_Blinky} .........................................................
 QP::QActive * const AO_Blinky = &Blinky::instance;
-//.$enddef${AOs::AO_Blinky} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//...

@@ -38,6 +38,7 @@
 * @endcond
 */
 #define QP_IMPL           /* this is QP implementation */
+#include <Arduino.h>
 #include "qf_port.hpp"      /* QF port */
 #include "qf_pkg.hpp"
 #include "qassert.h"
@@ -62,14 +63,6 @@
     #error "FreeRTOS configMAX_PRIORITIES must not be less than QF_MAX_ACTIVE"
 #endif
 
-#if defined( CONFIG_QPC_PINNED_TO_CORE_0 )
-    #define QPC_CPU_NUM         PRO_CPU_NUM
-#elif defined( CONFIG_QPC_PINNED_TO_CORE_1 )
-    #define QPC_CPU_NUM         APP_CPU_NUM
-#else
-    /* Defaults to APP_CPU */
-    #define QPC_CPU_NUM         APP_CPU_NUM
-#endif
 
 int_t qf_run_active = 0;
 
@@ -87,26 +80,13 @@ Q_DEFINE_THIS_MODULE("qf_port")
 
 /* Local objects -----------------------------------------------------------*/
 static void task_function(void *pvParameters); /* FreeRTOS task signature */
-static IRAM_ATTR void freertos_tick_hook(void); /*Tick hook for QP */
-static uint8_t const l_TickHook = static_cast<uint8_t>(0);
+
 
 /*==========================================================================*/
 
-static IRAM_ATTR void freertos_tick_hook(void)
-{
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    if(qf_run_active != 0) {
-        /* process time events for rate 0 */
-		QF::TICK_X_FROM_ISR(0U, &xHigherPriorityTaskWoken, &l_TickHook);
-        /* notify FreeRTOS to perform context switch from ISR, if needed */
-        if(xHigherPriorityTaskWoken) {
-            portYIELD_FROM_ISR();
-        }
-    }
-}
 
 void QF::init(void) {
-    esp_register_freertos_tick_hook_for_cpu(freertos_tick_hook, QPC_CPU_NUM);
+
 }
 /*..........................................................................*/
 int_t QF::run(void) {
@@ -155,7 +135,7 @@ void QActive::start(std::uint_fast8_t const prio,
 								
 										
     /* statically create the FreeRTOS task for the AO */
-    xTaskCreatePinnedToCore(
+    BaseType_t task_res = xTaskCreatePinnedToCore(
               &task_function,           /* the task function */
               taskName ,                /* the name of the task */
               stkSize/sizeof(portSTACK_TYPE), /* stack size */
@@ -163,8 +143,9 @@ void QActive::start(std::uint_fast8_t const prio,
               prio + tskIDLE_PRIORITY,  /* FreeRTOS priority */
               //static_cast<StackType_t *>(stkSto),    /* stack storage */
               &m_thread,              /* task buffer */
-              static_cast<BaseType_t>(QPC_CPU_NUM));            /* CPU number */
-    //Q_ENSURE_ID(210, thr !=  static_cast<TaskHandle_t>(0)); /* must be created */
+              static_cast<BaseType_t>(QP_CPU_NUM));            /* CPU number */
+     
+    Q_ENSURE_ID(210, task_res == pdPASS ); /* must be created */
 }
 /*..........................................................................*/
 void QActive::setAttr(std::uint32_t attr1, void const *attr2) {
@@ -199,11 +180,11 @@ static void task_function(void *pvParameters) { /* FreeRTOS task signature */
 /*==========================================================================*/
 /* The "FromISR" QP APIs for the FreeRTOS port... */
 #ifdef Q_SPY
-bool IRAM_ATTR QActive::postFromISR_(QEvt const * const e,
+bool QActive::postFromISR_(QEvt const * const e,
                            std::uint_fast16_t const margin, void *par,
                            void const * const sender) noexcept
 #else
-bool IRAM_ATTR QActive::postFromISR_(QEvt const * const e,
+bool QActive::postFromISR_(QEvt const * const e,
                            std::uint_fast16_t const margin,
                            void *par) noexcept
 #endif
@@ -216,7 +197,6 @@ bool IRAM_ATTR QActive::postFromISR_(QEvt const * const e,
 
     portENTER_CRITICAL_ISR(&QF_esp32mux);
     nFree = m_eQueue.m_nFree; /* get volatile into the temporary */
-
     if (margin == QF_NO_MARGIN) {
         if (nFree > 0U) {
             status = true; /* can post */
@@ -234,7 +214,6 @@ bool IRAM_ATTR QActive::postFromISR_(QEvt const * const e,
     }
 
     if (status) { /* can post the event? */
-
         QS_BEGIN_NOCRIT_PRE_(QS_QF_ACTIVE_POST, m_prio)
             QS_TIME_PRE_();       /* timestamp */
             QS_OBJ_PRE_(sender);  /* the sender object */
@@ -249,7 +228,6 @@ bool IRAM_ATTR QActive::postFromISR_(QEvt const * const e,
         if (e->poolId_ != 0U) {
             QF_EVT_REF_CTR_INC_(e); /* increment the reference counter */
         }
-
         --nFree; /* one free entry just used up */
         m_eQueue.m_nFree = nFree;    /* update the volatile */
         if (m_eQueue.m_nMin > nFree) {
@@ -257,12 +235,11 @@ bool IRAM_ATTR QActive::postFromISR_(QEvt const * const e,
         }
 
         /* empty queue? */
-        if (m_eQueue.m_frontEvt == (QEvt *)0) {
+        if (m_eQueue.m_frontEvt == nullptr) {
             m_eQueue.m_frontEvt = e;    /* deliver event directly */
             portEXIT_CRITICAL_ISR(&QF_esp32mux);
-
             /* signal the event queue */
-            vTaskNotifyGiveFromISR(reinterpret_cast<TaskHandle_t>(&m_thread),
+            vTaskNotifyGiveFromISR(static_cast<TaskHandle_t>(m_thread),
                                    static_cast<BaseType_t *>(par));
         }
         /* queue is not empty, insert event into the ring-buffer */
@@ -298,10 +275,10 @@ bool IRAM_ATTR QActive::postFromISR_(QEvt const * const e,
 
 /*..........................................................................*/
 #ifdef Q_SPY
-void IRAM_ATTR QF::publishFromISR_(QEvt const *e, void *par,
+void QF::publishFromISR_(QEvt const *e, void *par,
                          void const * const sender) noexcept
 #else
-void IRAM_ATTR QF::publishFromISR_(QEvt const *e, void *par) noexcept
+void QF::publishFromISR_(QEvt const *e, void *par) noexcept
 #endif
 {
     QPSet subscrList; /* local, modifiable copy of the subscriber list */
@@ -367,10 +344,10 @@ void IRAM_ATTR QF::publishFromISR_(QEvt const *e, void *par) noexcept
 
 /*..........................................................................*/
 #ifdef Q_SPY
-void IRAM_ATTR QF::tickXfromISR_(std::uint_fast8_t const tickRate, void *par,
+void QF::tickXfromISR_(std::uint_fast8_t const tickRate, void *par,
                        void const * const sender) noexcept
 #else
-void IRAM_ATTR QF::tickXfromISR_(std::uint_fast8_t const tickRate, void *par) noexcept
+void QF::tickXfromISR_(std::uint_fast8_t const tickRate, void *par) noexcept
 #endif
 {
     QTimeEvt *prev = &timeEvtHead_[tickRate];
@@ -388,7 +365,7 @@ void IRAM_ATTR QF::tickXfromISR_(std::uint_fast8_t const tickRate, void *par) no
         QTimeEvt *t = prev->m_next;  /* advance down the time evt. list */
 
         /* end of the list? */
-        if (t == (QTimeEvt *)0) {
+        if (t == nullptr) {
 
             /* any new time events armed since the last run of QF_tickX_()? */
             if (timeEvtHead_[tickRate].m_act != nullptr) {
@@ -417,7 +394,7 @@ void IRAM_ATTR QF::tickXfromISR_(std::uint_fast8_t const tickRate, void *par) no
             --t->m_ctr;
 
             /* is time event about to expire? */
-            if (t->m_ctr == (QTimeEvtCtr)0) {
+            if (t->m_ctr ==  0U) {
                 QActive *act = t->toActive(); // temp. for volatile
 
                 /* periodic time evt? */
@@ -429,10 +406,11 @@ void IRAM_ATTR QF::tickXfromISR_(std::uint_fast8_t const tickRate, void *par) no
                 else {
                     prev->m_next = t->m_next;
                     /* mark time event 't' as NOT linked */
-                    t->refCtr_ &= (uint8_t)(~TE_IS_LINKED);
+                    t->refCtr_ &= static_cast<std::uint8_t>(~TE_IS_LINKED);
                     /* do NOT advance the prev pointer */
 
-                    QS_BEGIN_NOCRIT_PRE_(QS_QF_TIMEEVT_AUTO_DISARM, act->m_prio)
+                    QS_BEGIN_NOCRIT_PRE_(QS_QF_TIMEEVT_AUTO_DISARM,
+                                         act->m_prio)
                         QS_OBJ_PRE_(t);        /* this time event object */
                         QS_OBJ_PRE_(act);      /* the target AO */
                         QS_U8_PRE_(tickRate);  /* tick rate */
@@ -467,7 +445,7 @@ void IRAM_ATTR QF::tickXfromISR_(std::uint_fast8_t const tickRate, void *par) no
 
 
 /*..........................................................................*/
-QEvt IRAM_ATTR *QF::newXfromISR_(std::uint_fast16_t const evtSize,
+QEvt *QF::newXfromISR_(std::uint_fast16_t const evtSize,
                        std::uint_fast16_t const margin,
                        enum_t const sig) noexcept
 {
@@ -530,7 +508,7 @@ QEvt IRAM_ATTR *QF::newXfromISR_(std::uint_fast16_t const evtSize,
     return e; /* can't be NULL if we can't tolerate bad allocation */
 }
 /*..........................................................................*/
-void IRAM_ATTR QF::gcFromISR(QEvt const * const e) noexcept {
+void QF::gcFromISR(QEvt const * const e) noexcept {
 
     /* is it a dynamic event? */
     if (e->poolId_ != 0U) {
@@ -584,7 +562,7 @@ void IRAM_ATTR QF::gcFromISR(QEvt const * const e) noexcept {
 
 
 /*..........................................................................*/
-void IRAM_ATTR QMPool::putFromISR(void *b, std::uint_fast8_t const qs_id) noexcept {
+void QMPool::putFromISR(void *b, std::uint_fast8_t const qs_id) noexcept {
 
     /** @pre # free blocks cannot exceed the total # blocks and
     * the block pointer must be from this pool.
@@ -618,13 +596,13 @@ void *QMPool::getFromISR(std::uint_fast16_t const margin,
 
     /* have more free blocks than the requested margin? */
     if (m_nFree > static_cast<QMPoolCtr>(margin)) {
-        void *fb_next;
+        
         fb = static_cast<QFreeBlock *>(m_free_head);  // get a free block
 
         /* the pool has some free blocks, so a free block must be available */
         Q_ASSERT_ID(910, fb != nullptr);
 
-        fb_next = fb->m_next; /* put volatile to a temporary to avoid UB */
+        void *fb_next = fb->m_next; /* put volatile to a temporary to avoid UB */
 
         /* is the pool becoming empty? */
         --m_nFree; /* one less free block */
