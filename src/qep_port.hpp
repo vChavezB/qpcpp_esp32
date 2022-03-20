@@ -1,15 +1,16 @@
 /// @file
-/// @brief QEP/C++ port, GCC-Xtensa compiler
+/// @brief QEP/C++ port, generic C++11 compiler
 /// @cond
 ///***************************************************************************
-/// Last updated for version 6.9.4
-/// Last updated on  2022-03-17
+/// Last updated for version 6.8.0
+/// Last updated on  2022-03-20
 ///
 ///                    Q u a n t u m  L e a P s
 ///                    ------------------------
 ///                    Modern Embedded Software
 ///
-/// Copyright (C) 2005-2022 Quantum Leaps. All rights reserved.
+/// Copyright (C) 2022 Victor Chavez.
+/// Copyright (C) 2005-2020 Quantum Leaps. All rights reserved.
 ///
 /// This program is open source software: you can redistribute it and/or
 /// modify it under the terms of the GNU General Public License as published
@@ -38,14 +39,14 @@
 #ifndef QEP_PORT_HPP
 #define QEP_PORT_HPP
 
-// enable QP/Spy software tracing instrumentation
-#define Q_SPY  1U
+#include <cstdint>  // Exact-width types. C++11 Standard
+
+#include "qep.hpp"  // QEP platform-independent public interface
 
 //! no-return function specifier (GCC)
 #define Q_NORETURN   __attribute__ ((noreturn)) void
 
-#include <cstdint>  // Exact-width types. C++11 Standard
-
-#include "qep.hpp"  // QEP platform-independent public interface
+// enable QP/Spy software tracing instrumentation
+#define Q_SPY  1U
 
 #endif // QEP_PORT_HPP
