@@ -1,18 +1,18 @@
 /**
 * @file
-* @brief "Experimental" QF/C port to Espressif ESP-IDF (version 4.x)
+* @brief "Experimental" QF/CPP port to Espressif ESP-IDF (version 4.x)
 * @ingroup ports
 * @cond
 ******************************************************************************
 * Last updated for version 6.9.4
-* Last updated on  2021-06-29
+* Last updated on  2022-03-20
 *
 *                    Q u a n t u m  L e a P s
 *                    ------------------------
 *                    Modern Embedded Software
 *
+* Copyright (C) 2022 Victor Chavez
 * Copyright (C) 2005-2021 Quantum Leaps, LLC. All rights reserved.
-*
 * This program is open source software: you can redistribute it and/or
 * modify it under the terms of the GNU General Public License as published
 * by the Free Software Foundation, either version 3 of the License, or
@@ -74,7 +74,7 @@
 /* global spinlock "mutex" for all critical sections in QF (see NOTE3) */
 extern PRIVILEGED_DATA portMUX_TYPE QF_esp32mux;
 
-
+2 of 6
 #if defined( CONFIG_QP_PINNED_TO_CORE_0 )
     #define QP_CPU_NUM         PRO_CPU_NUM
 #elif defined( CONFIG_QP_PINNED_TO_CORE_0 )
@@ -175,8 +175,8 @@ enum FreeRTOS_TaskAttrs {
     } while (false)
 
     #define QF_SCHED_STAT_
-    #define QF_SCHED_LOCK_(dummy) vTaskSuspendAll()
-    #define QF_SCHED_UNLOCK_()    xTaskResumeAll()
+    #define QF_SCHED_LOCK_(dummy) //vTaskSuspendAll()
+    #define QF_SCHED_UNLOCK_()   //xTaskResumeAll()
 
     /* native QF event pool operations */
     #define QF_EPOOL_TYPE_            QMPool
@@ -208,8 +208,7 @@ enum FreeRTOS_TaskAttrs {
 * is based on FreeRTOS V8.2.0, but apparently FreeRTOS-ESP-IDF has been
 * updated with the newer features introduced to the original FreeRTOS in the
 * later versions. For example, FreeRTOS-ESP32 supports the "static allocation",
-* first introduced in baseline FreeRTOS V9.x. This QP port to FreeRTOS-ESP-IDF
-* takes advantage of the "static allocation".
+* first introduced in baseline FreeRTOS V9.x. 
 *
 * [1]: https://www.espressif.com/en/products/sdks/esp-idf
 * [2]: https://freertos.org
@@ -228,8 +227,14 @@ enum FreeRTOS_TaskAttrs {
 * This QF port to FreeRTOS-ESP32 uses the FreeRTOS-ESP32 spin lock "mutex",
 * similar to the internal implementation of FreeRTOS-ESP32 (see tasks.c).
 * However, the QF port uses its own "mutex" object QF_esp32mux.
-*
+* 
 * NOTE4:
+* This QP/C++ port used as reference the esp-idf QP/C port counterpart. The main 
+* difference implementation-wise is that instead of using xTaskCreateStaticPinnedToCore,
+* it uses xTaskCreatePinnedToCore. The reason is that this port was designed to work
+* with the Arduino SDK, which does not include xTaskCreateStaticPinnedToCore.
+*
+* NOTE5:
 * The design of FreeRTOS requires using different APIs inside the ISRs
 * (the "FromISR" variant) than at the task level. Accordingly, this port
 * provides the "FromISR" variants for QP functions and "FROM_ISR" variants
