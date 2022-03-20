@@ -41,7 +41,7 @@
 // enable QP/Spy software tracing instrumentation
 #define Q_SPY  1U
 
-//! no-return function specifier (GCC-ARM compiler)
+//! no-return function specifier (GCC)
 #define Q_NORETURN   __attribute__ ((noreturn)) void
 
 #include <cstdint>  // Exact-width types. C++11 Standard
