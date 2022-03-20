@@ -41,12 +41,12 @@
 
 #include <cstdint>  // Exact-width types. C++11 Standard
 
-#include "qep.hpp"  // QEP platform-independent public interface
+// enable QP/Spy software tracing instrumentation
+#define Q_SPY  1U
 
 //! no-return function specifier (GCC)
 #define Q_NORETURN   __attribute__ ((noreturn)) void
 
-// enable QP/Spy software tracing instrumentation
-#define Q_SPY  1U
+#include "qep.hpp"  // QEP platform-independent public interface
 
 #endif // QEP_PORT_HPP
