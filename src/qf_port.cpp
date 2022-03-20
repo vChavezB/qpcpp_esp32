@@ -5,14 +5,14 @@
 * @cond
 ******************************************************************************
 * Last updated for version 6.9.4
-* Last updated on  2022-03-17
+* Last updated on  2022-03-20
 *
 *                    Q u a n t u m  L e a P s
 *                    ------------------------
 *                    Modern Embedded Software
 *
+* Copyright (C) 2022 Victor Chavez
 * Copyright (C) 2005-2022 Quantum Leaps, LLC. All rights reserved.
-*
 * This program is open source software: you can redistribute it and/or
 * modify it under the terms of the GNU General Public License as published
 * by the Free Software Foundation, either version 3 of the License, or
@@ -38,7 +38,6 @@
 * @endcond
 */
 #define QP_IMPL           /* this is QP implementation */
-#include <Arduino.h>
 #include "qf_port.hpp"      /* QF port */
 #include "qf_pkg.hpp"
 #include "qassert.h"
@@ -53,12 +52,6 @@
 #include "esp_freertos_hooks.h"
 #include "freertos/task.h"
 
-/*
-#if ( configSUPPORT_STATIC_ALLOCATION == 0 )
-    #error "This QP/CPP port to FreeRTOS requires configSUPPORT_STATIC_ALLOCATION "
-#endif
-*/
-
 #if ( configMAX_PRIORITIES < QF_MAX_ACTIVE )
     #error "FreeRTOS configMAX_PRIORITIES must not be less than QF_MAX_ACTIVE"
 #endif
@@ -71,8 +64,6 @@ PRIVILEGED_DATA portMUX_TYPE QF_esp32mux = portMUX_INITIALIZER_UNLOCKED;
 namespace QP {
 
 Q_DEFINE_THIS_MODULE("qf_port")
-
-
 
 /* Local objects -----------------------------------------------------------*/
 static void task_function(void *pvParameters); /* FreeRTOS task signature */
@@ -87,7 +78,6 @@ void QF::init(void) {
 /*..........................................................................*/
 int_t QF::run(void) {
     onStartup();
-
    // produce the QS_QF_RUN trace record
     QS_CRIT_STAT_
     QS_BEGIN_PRE_(QS_QF_RUN, 0U)
