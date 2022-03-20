@@ -44,9 +44,9 @@
 // enable QP/Spy software tracing instrumentation
 #define Q_SPY  1U
 
+#include "qep.hpp"  // QEP platform-independent public interface
+
 //! no-return function specifier (GCC)
 #define Q_NORETURN   __attribute__ ((noreturn)) void
-
-#include "qep.hpp"  // QEP platform-independent public interface
 
 #endif // QEP_PORT_HPP
