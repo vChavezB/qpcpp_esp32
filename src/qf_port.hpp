@@ -187,7 +187,7 @@ extern "C" {
     /* FreeRTOS signaling (unblocking) for event queue (task level) */
     #define QACTIVE_EQUEUE_SIGNAL_(me_) do {           \
         QF_CRIT_X_();                                  \
-        xTaskNotifyGive((TaskHandle_t)&(me_)->m_thread); \
+        xTaskNotifyGive((TaskHandle_t)(me_)->m_thread); \
         QF_CRIT_E_();                                  \
     } while (false)
 
