@@ -74,7 +74,6 @@
 /* global spinlock "mutex" for all critical sections in QF (see NOTE3) */
 extern PRIVILEGED_DATA portMUX_TYPE QF_esp32mux;
 
-
 #if defined( CONFIG_QP_PINNED_TO_CORE_0 )
     #define QP_CPU_NUM         PRO_CPU_NUM
 #elif defined( CONFIG_QP_PINNED_TO_CORE_0 )
@@ -86,32 +85,28 @@ extern PRIVILEGED_DATA portMUX_TYPE QF_esp32mux;
 
 /* the "FromISR" versions of the QF APIs, see NOTE4 */
 #ifdef Q_SPY
-    #define POST_FROM_ISR(e_, pxHigherPrioTaskWoken_, sender_) \
-        postFromISR_((e_), QP::QF_NO_MARGIN,              \
-                                    (pxHigherPrioTaskWoken_), (sender_))
-
-    #define POST_X_FROM_ISR(e_, margin_,                \
-                                    pxHigherPrioTaskWoken_, sender_) \
-        postFromISR_((e_), (margin_),                \
-                              (pxHigherPrioTaskWoken_), (sender_))
-
     #define PUBLISH_FROM_ISR(e_, pxHigherPrioTaskWoken_, sender_) \
         publishFromISR_((e_), (pxHigherPrioTaskWoken_),(sender_))
+
+    #define POST_FROM_ISR(e_, pxHigherPrioTaskWoken_, sender_) \
+        postFromISR_((e_), QP::QF_NO_MARGIN, \
+                      (pxHigherPrioTaskWoken_), (sender_))
+
+    #define POST_X_FROM_ISR(e_, margin_, pxHigherPrioTaskWoken_, sender_) \
+        postFromISR_((e_), (margin_), (pxHigherPrioTaskWoken_), (sender_))
 
     #define TICK_X_FROM_ISR(tickRate_, pxHigherPrioTaskWoken_, sender_) \
         tickXfromISR_((tickRate_), (pxHigherPrioTaskWoken_), (sender_))
 #else
+    #define PUBLISH_FROM_ISR(e_, pxHigherPrioTaskWoken_, dummy) \
+        publishFromISR_((e_), (pxHigherPrioTaskWoken_))
+
     #define POST_FROM_ISR(e_, pxHigherPrioTaskWoken_, dummy) \
-        postFromISR_(((e_), QP::QF_NO_MARGIN,           \
-                                    (pxHigherPrioTaskWoken_))
+        postFromISR_((e_), QP::QF_NO_MARGIN, (pxHigherPrioTaskWoken_))
 
     #define POST_X_FROM_ISR(me_, e_, margin_,               \
                                     pxHigherPrioTaskWoken_,  dummy) \
-        postFromISR_((e_), (margin_),               \
-                              (pxHigherPrioTaskWoken_))
-
-    #define PUBLISH_FROM_ISR(e_, pxHigherPrioTaskWoken_, dummy) \
-        publishFromISR_((e_), (pxHigherPrioTaskWoken_))
+        postFromISR_((e_), (margin_), (pxHigherPrioTaskWoken_))
 
     #define TICK_X_FROM_ISR(tickRate_, pxHigherPrioTaskWoken_, dummy) \
         tickXfromISR_((tickRate_), (pxHigherPrioTaskWoken_))
@@ -175,8 +170,8 @@ enum FreeRTOS_TaskAttrs {
     } while (false)
 
     #define QF_SCHED_STAT_
-    #define QF_SCHED_LOCK_(dummy) //vTaskSuspendAll()
-    #define QF_SCHED_UNLOCK_()   //xTaskResumeAll()
+    #define QF_SCHED_LOCK_(dummy) vTaskSuspendAll()
+    #define QF_SCHED_UNLOCK_()    xTaskResumeAll()
 
     /* native QF event pool operations */
     #define QF_EPOOL_TYPE_            QMPool
