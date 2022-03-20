@@ -67,8 +67,6 @@ Q_DEFINE_THIS_MODULE("qf_port")
 
 /* Local objects -----------------------------------------------------------*/
 static void task_function(void *pvParameters); /* FreeRTOS task signature */
-
-
 /*==========================================================================*/
 
 
@@ -76,6 +74,7 @@ void QF::init(void) {
 
 }
 /*..........................................................................*/
+
 int_t QF::run(void) {
     onStartup();
    // produce the QS_QF_RUN trace record
