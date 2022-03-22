@@ -32,7 +32,7 @@ using namespace QP;
 // QS facilities
 
 // un-comment if QS instrumentation needed
-#define QS_ON
+//#define QS_ON
 
 enum AppRecords { // application-specific QS trace records
     PHILO_STAT = QP::QS_USER,
@@ -54,7 +54,7 @@ static void tickHook_ESP32(void)
     if(xHigherPriorityTaskWoken) {
         portYIELD_FROM_ISR();
     }
-    #ifndef QS_ON
+#ifndef QS_ON
     if (Serial.available() > 0) {
         switch (Serial.read()) { // read the incoming byte
             case 'p':
@@ -96,16 +96,14 @@ void BSP::init(void) {
 }
 //............................................................................
 void BSP::displayPhilStat(uint8_t n, char_t const *stat) {
-    digitalWrite(LED_BUILTIN, (stat[0] == 'e') ? HIGH : LOW);
-
 #ifdef QS_ON
     QS_BEGIN_ID(PHILO_STAT, AO_Philo[n]->m_prio) // app-specific record begin
         QS_U8(1, n);  // Philo number
         QS_STR(stat); // Philo status
     QS_END()
 #else
-    Serial.print("Philosopher ");
-    Serial.print(n, DEC);
+    Serial.print("P");
+    Serial.write(48+n);
     Serial.print(" ");
     Serial.println(stat);
 #endif
@@ -175,7 +173,7 @@ void QF::onStartup(void) {
                     "QSPY", /* Name of the task */
                     10000,      /* Stack size in words */
                     NULL,       /* Task input parameter */
-                    20,          /* Priority of the task */
+                    configMAX_PRIORITIES-1,          /* Priority of the task */
                     NULL,       /* Task handle. */
                     QP_CPU_NUM);  /* Core where the task should run */
 #endif
@@ -218,7 +216,12 @@ void QP::QS::onCleanup(void) {
 }
 //............................................................................
 QP::QSTimeCtr QP::QS::onGetTime(void) {
+#ifdef QS_ON
     return millis();
+#else
+    return 0;
+#endif
+
 }
 //............................................................................
 void QP::QS::onFlush(void) {
