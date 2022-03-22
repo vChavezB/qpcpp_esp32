@@ -82,7 +82,7 @@ void QF::onStartup(void) {
                     "QSPY", /* Name of the task */
                     10000,      /* Stack size in words */
                     NULL,       /* Task input parameter */
-                    20,          /* Priority of the task */
+                    configMAX_PRIORITIES-1,          /* Priority of the task */
                     NULL,       /* Task handle. */
                     QP_CPU_NUM);  /* Core where the task should run */
 #endif
