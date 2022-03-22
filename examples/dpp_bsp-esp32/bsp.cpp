@@ -103,7 +103,7 @@ void BSP::displayPhilStat(uint8_t n, char_t const *stat) {
     QS_END()
 #else
     Serial.print("Philosopher ");
-    Serial.write(48+n);
+    Serial.print(n);
     Serial.print(" ");
     Serial.println(stat);
 #endif
@@ -216,11 +216,7 @@ void QP::QS::onCleanup(void) {
 }
 //............................................................................
 QP::QSTimeCtr QP::QS::onGetTime(void) {
-#ifdef QS_ON
     return millis();
-#else
-    return 0;
-#endif
 
 }
 //............................................................................
