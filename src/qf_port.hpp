@@ -76,7 +76,7 @@ extern PRIVILEGED_DATA portMUX_TYPE QF_esp32mux;
 
 #if defined( CONFIG_QP_PINNED_TO_CORE_0 )
     #define QP_CPU_NUM         PRO_CPU_NUM
-#elif defined( CONFIG_QP_PINNED_TO_CORE_0 )
+#elif defined( CONFIG_QP_PINNED_TO_CORE_1 )
     #define QP_CPU_NUM         APP_CPU_NUM
 #else
     /* Defaults to APP_CPU */
