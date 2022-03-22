@@ -4,6 +4,10 @@
 #include "Arduino.h"
 #include "esp_freertos_hooks.h"
 
+#ifndef LED_BUILTIN  //If current ESP32 board does not define LED_BUILTIN
+static constexpr unsigned LED_BUILTIN=13U; 
+#endif
+
 using namespace QP;
 
 // QS facilities
@@ -32,9 +36,8 @@ void BSP::init(void) {
     // initialize the hardware used in this sketch...
     // NOTE: interrupts are configured and started later in QF::onStartup()
     pinMode(LED_BUILTIN, OUTPUT);
-
-#ifdef QS_ON
     QS_INIT(nullptr);
+#ifdef QS_ON
     // setup the QS filters...
     QS_GLB_FILTER(QP::QS_SM_RECORDS); // state machine records
     QS_GLB_FILTER(QP::QS_AO_RECORDS); // active object records
