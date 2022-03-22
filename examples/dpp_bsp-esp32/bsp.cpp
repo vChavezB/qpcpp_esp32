@@ -102,7 +102,7 @@ void BSP::displayPhilStat(uint8_t n, char_t const *stat) {
         QS_STR(stat); // Philo status
     QS_END()
 #else
-    Serial.print("P");
+    Serial.print("Philosopher ");
     Serial.write(48+n);
     Serial.print(" ");
     Serial.println(stat);
