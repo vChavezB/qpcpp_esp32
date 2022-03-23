@@ -27,11 +27,8 @@ qspy -p YOUR_SERIAL_PORT -b 115200
 
 ### QView
 
-DPP example can be tested with [QView™](https://www.state-machine.com/qtools/qview.html) example located in `examples/dpp_bsp-esp32/qview`. 
+DPP example can be tested with [QView™](https://www.state-machine.com/qtools/qview.html) example located in `examples/dpp_bsp-esp32/qview`. There are two bat scripts (Windows) which can run the QView scripts.
 
-```bash
-qview-dpp.bat
-```
 
 Note: QSpy must be running before using QView.
 
