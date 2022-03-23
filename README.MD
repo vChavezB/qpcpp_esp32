@@ -1,6 +1,7 @@
 # QP/C++ ESP32
 
-Arduino library to use QP/C++ with the ESP32 and the Arduino SDK. Based on the [port ](https://github.com/QuantumLeaps/qpc/tree/master/ports/esp-idf) from QP/C, I have ported the version to its C++ counterpart.
+Arduino library to use QP/C++ with the ESP32 and the Arduino SDK. Based on the [port](https://github.com/QuantumLeaps/qpc/tree/master/ports/esp-idf) from QP/C.
+
 
 ## Changes from ESP-IDF port for QP/C
 
