@@ -22,7 +22,7 @@ Open any of the examples and upload to an ESP32.
 QSPY can be activated by defining `QS_ON`in `bsp.cpp` of both examples.
 
 ```bash
-qspy -p YOUR_SERIAL_PORT -b 115200
+qspy -c YOUR_SERIAL_PORT -b 115200
 ```
 
 ### QView
