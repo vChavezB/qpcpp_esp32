@@ -130,10 +130,12 @@ void BSP::init(void) {
 //............................................................................
 void BSP::ledOff(void) {
     digitalWrite(LED_BUILTIN, LOW);
+    Serial.println(&quot;led off&quot;);
 }
 //............................................................................
 void BSP::ledOn(void) {
     digitalWrite(LED_BUILTIN, HIGH);
+    Serial.println(&quot;led on&quot;);
 }
 
 //............................................................................
