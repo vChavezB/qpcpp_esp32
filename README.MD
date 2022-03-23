@@ -3,7 +3,7 @@
 Arduino library to use QP/C++ with the ESP32 and the Arduino SDK. Based on the [port](https://github.com/QuantumLeaps/qpc/tree/master/ports/esp-idf) from QP/C.
 
 
-## Changes from ESP-IDF port for QP/C
+## Changes from QP/C
 
  - Refactored macros and functions to C++
  - Task creation uses `xTaskCreatePinnedToCore` instead of `xTaskCreateStaticPinnedToCore`. 
