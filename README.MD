@@ -1,7 +1,7 @@
 # QP/C++ ESP32
 
 Arduino library to use QP/C++ with the ESP32 and the Arduino SDK. 
-Arduino port based on the [port](https://github.com/vChavezB/qpcpp/tree/esp32) developed for the ESP32.
+Arduino library based on the [port](https://github.com/vChavezB/qpcpp/tree/esp32) developed for the ESP32.
 
 ## How to test
 
@@ -9,7 +9,7 @@ Open any of the examples and upload to an ESP32.
 
 ### QPSY
 
-QSPY can be activated by defining `QS_ON`in `bsp.cpp` of both examples.
+[QSPY](https://www.state-machine.com/qtools/qspy.html) can be activated by defining `QS_ON`in `bsp.cpp` of both examples.
 
 ```bash
 qspy -c YOUR_SERIAL_PORT -b 115200
