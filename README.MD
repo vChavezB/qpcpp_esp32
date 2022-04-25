@@ -1,7 +1,7 @@
 # QP/C++ ESP32
 
 Arduino library to use QP/C++ with the ESP32 and the Arduino SDK. 
-Arduino library based on the [port](https://github.com/vChavezB/qpcpp/tree/esp32) developed for the ESP32.
+Based on the [port](https://github.com/vChavezB/qpcpp/tree/esp32) developed for the ESP32.
 
 ## How to test
 
