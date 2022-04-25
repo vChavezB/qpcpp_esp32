@@ -13,7 +13,9 @@ Open any of the examples and upload to an ESP32.
 
 ## QPSY
 
-[QSPY](https://www.state-machine.com/qtools/qspy.html) can be activated by defining `QS_ON`in `bsp.cpp` of both examples.
+[QSPY](https://www.state-machine.com/qtools/qspy.html) can be activated by defining `QS_ON`in `bsp.cpp` of both examples
+
+Example of how to communicate with esp32 target with qspy enabled.
 
 ```bash
 qspy -c YOUR_SERIAL_PORT -b 115200
