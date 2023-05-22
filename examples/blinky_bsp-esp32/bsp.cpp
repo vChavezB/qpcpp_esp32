@@ -36,7 +36,7 @@ static void tickHook_ESP32(void)
 {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     /* process time events for rate 0 */
-    QF::TICK_FROM_ISR(&xHigherPriorityTaskWoken, &l_TickHook);
+    QTimeEvt::TICK_X_FROM_ISR(0U, &xHigherPriorityTaskWoken, &l_TickHook);
     /* notify FreeRTOS to perform context switch from ISR, if needed */
     if(xHigherPriorityTaskWoken) {
         portYIELD_FROM_ISR();

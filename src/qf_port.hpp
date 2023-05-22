@@ -89,7 +89,7 @@ extern PRIVILEGED_DATA portMUX_TYPE QF_esp32mux;
         publishFromISR_((e_), (pxHigherPrioTaskWoken_),(sender_))
 
     #define POST_FROM_ISR(e_, pxHigherPrioTaskWoken_, sender_) \
-        postFromISR_((e_), QP::QF_NO_MARGIN, \
+        postFromISR_((e_), QP::QF::NO_MARGIN, \
                       (pxHigherPrioTaskWoken_), (sender_))
 
     #define POST_X_FROM_ISR(e_, margin_, pxHigherPrioTaskWoken_, sender_) \
@@ -102,7 +102,7 @@ extern PRIVILEGED_DATA portMUX_TYPE QF_esp32mux;
         publishFromISR_((e_), (pxHigherPrioTaskWoken_))
 
     #define POST_FROM_ISR(e_, pxHigherPrioTaskWoken_, dummy) \
-        postFromISR_((e_), QP::QF_NO_MARGIN, (pxHigherPrioTaskWoken_))
+        postFromISR_((e_), QP::QF::NO_MARGIN, (pxHigherPrioTaskWoken_))
 
     #define POST_X_FROM_ISR(me_, e_, margin_,               \
                                     pxHigherPrioTaskWoken_,  dummy) \
@@ -118,11 +118,11 @@ extern PRIVILEGED_DATA portMUX_TYPE QF_esp32mux;
 #ifdef Q_EVT_CTOR /* Shall the ctor for the ::QEvt class be provided? */
 
     #define Q_NEW_FROM_ISR(evtT_, sig_, ...)                  \
-        (new(QP::QF::newXfromISR_(sizeof(evtT_), QP::QF_NO_MARGIN, 0)) \
+        (new(QP::QF::newXfromISR_(sizeof(evtT_), QP::QF::NO_MARGIN, 0)) \
             evtT_((sig_),  ##__VA_ARGS__))
 
     #define Q_NEW_X_FROM_ISR(e_, evtT_, margin_, sig_, ...) do { \
-        (e_) = (evtT_ *)QF_newXFromISR_(sizeof(evtT_),           \
+        (e_) = (evtT_ *)QP::QF::newXfromISR_(sizeof(evtT_),           \
                                  (margin_), 0);                  \
         if ((e_) != (evtT_ *)0) {                                \
             evtT_##_ctor((e_), (sig_), ##__VA_ARGS__);           \
@@ -134,10 +134,10 @@ extern PRIVILEGED_DATA portMUX_TYPE QF_esp32mux;
     #define Q_NEW_FROM_ISR(evtT_, sig_)                         \
         (static_cast<evtT_ *>(QP::QF::newXfromISR_(             \
                 static_cast<std::uint_fast16_t>(sizeof(evtT_)), \
-                QP::QF_NO_MARGIN, (sig_))))
+                QP::QF::NO_MARGIN, (sig_))))
 
     #define Q_NEW_X_FROM_ISR(e_, evtT_, margin_, sig_) ((e_) = \
-        (evtT_ *)QF_newXFromISR_((uint_fast16_t)sizeof(evtT_), \
+        (evtT_ *)QP::QF::newXfromISR_((uint_fast16_t)sizeof(evtT_), \
                                  (margin_), (sig_)))
 
 #endif /* Q_EVT_CTOR */

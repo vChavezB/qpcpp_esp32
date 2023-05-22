@@ -27,6 +27,7 @@ static constexpr unsigned LED_BUILTIN=13U;
 #endif
 
 using namespace QP;
+static uint8_t const l_TickHook = static_cast<uint8_t>(0);
 
 //............................................................................
 // QS facilities
@@ -49,7 +50,7 @@ static void tickHook_ESP32(void)
 {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     /* process time events for rate 0 */
-    QF::TICK_FROM_ISR(&xHigherPriorityTaskWoken, &l_TIMER_ID);
+    QTimeEvt::tickFromISR_(0U,&xHigherPriorityTaskWoken, &l_TickHook);
     /* notify FreeRTOS to perform context switch from ISR, if needed */
     if(xHigherPriorityTaskWoken) {
         portYIELD_FROM_ISR();
@@ -167,6 +168,7 @@ void QSpy_Task(void *) {
 
 void QF::onStartup(void) {
     esp_register_freertos_tick_hook_for_cpu(tickHook_ESP32, QP_CPU_NUM);
+	QS_OBJ_DICTIONARY(&l_TickHook);
 #ifdef QS_ON
     xTaskCreatePinnedToCore(
                     QSpy_Task,   /* Function to implement the task */
