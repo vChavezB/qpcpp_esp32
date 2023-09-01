@@ -96,7 +96,7 @@ extern PRIVILEGED_DATA portMUX_TYPE QF_esp32mux;
         postFromISR_((e_), (margin_), (pxHigherPrioTaskWoken_), (sender_))
 
     #define TICK_X_FROM_ISR(tickRate_, pxHigherPrioTaskWoken_, sender_) \
-        tickXfromISR_((tickRate_), (pxHigherPrioTaskWoken_), (sender_))
+        tickFromISR_((tickRate_), (pxHigherPrioTaskWoken_), (sender_))
 #else
     #define PUBLISH_FROM_ISR(e_, pxHigherPrioTaskWoken_, dummy) \
         publishFromISR_((e_), (pxHigherPrioTaskWoken_))
@@ -109,7 +109,7 @@ extern PRIVILEGED_DATA portMUX_TYPE QF_esp32mux;
         postFromISR_((e_), (margin_), (pxHigherPrioTaskWoken_))
 
     #define TICK_X_FROM_ISR(tickRate_, pxHigherPrioTaskWoken_, dummy) \
-        tickXfromISR_((tickRate_), (pxHigherPrioTaskWoken_))
+        tickFromISR_((tickRate_), (pxHigherPrioTaskWoken_))
 #endif
 
 #define TICK_FROM_ISR(pxHigherPrioTaskWoken_, sender_) \
