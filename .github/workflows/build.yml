@@ -25,7 +25,7 @@ jobs:
           arduino-cli core update-index
           arduino-cli config init
           arduino-cli config set board_manager.additional_urls "${ESP32_BOARD_URL}"
-          arduino-cli core install esp32:esp32@2.0.11
+          arduino-cli core install esp32:esp32@${{ matrix.esp32_core_version }}
 
       - name: Install library
         run: |
