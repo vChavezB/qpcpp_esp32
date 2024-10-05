@@ -7,6 +7,9 @@ jobs:
     env:
       ARDUINO_LIB_PATH: /home/runner/Arduino/libraries
       ESP32_BOARD_URL: https://dl.espressif.com/dl/package_esp32_index.json
+    strategy:
+      matrix:
+        esp32_core_version: ["2.0.17","3.0.5"]
     runs-on: ubuntu-22.04
     steps:
       # Clone the repo
